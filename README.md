@@ -3,9 +3,9 @@
 Vereisten: 
 Voor het uitvoeren van deze challenge is een machine met MacOS of Linux benodigd met daarop Ansible 2.9, Python 3 en VirtualBox geinstalleerd. 
 
-Begin met het controleren van het init.sh script. Dit script controleert een paar zaken en gaat download vervolgens een CentOS 8 minimum iso (ca. 1.6 Gb). De download locatie is: ~/Downloads
+Begin met het controleren van het init.sh script. Dit script controleert een paar zaken en gaat vervolgens een CentOS 8 minimum iso (ca. 1.6 Gb) downloaden. De download locatie is: ~/Downloads
 
-Aangezien Ansible nog geen ondersteuning lijkt te hebben voor Virtual Box heb ik het aamaken van de VM buiten Ansible gehouden. Het is m.i. vrij nutteloos om een Ansible script op te bouwen met enkel 'command' modules. Het schrijven van een volledige python-module voor Ansible gaat helaas te veel tijd kosten. Om een machine te deployen kun je gebruik maken van het createvm.sh script. Let hierbij wel op dat je de juiste (bridged) netwerk kaart opgeeft (declaratie in het script) en wanneer je de download locatie in init.sh hebt aangepast, zul je die ook hier aan moeten passen. 
+Aangezien Ansible nog geen ondersteuning lijkt te hebben voor Virtual Box heb ik het aamaken van de VM buiten Ansible gehouden. Het is m.i. vrij nutteloos om een Ansible script op te bouwen met enkel 'command' of 'shell' modules. Het schrijven van een volledige python-module voor Ansible gaat helaas te veel tijd kosten. Om een machine te deployen kun je gebruik maken van het createvm.sh script. Let hierbij wel op dat je de juiste (bridged) netwerk kaart opgeeft (declaratie in het script) en wanneer je de download locatie in init.sh hebt aangepast, zul je die ook hier aan moeten passen. 
 
 Roep het script aan met de vm-naam en eventueel een omschrijving als parameter(s). De vm zal gebouwd worden met een harddisk en een dvd-drive aan de SATA controller en een virtuele immutable USB-stick voor de kickstart. Standaard heeft de VM 1 Gb geheugen, 1 vCPU en 8 Gb diskspace. 
 
