@@ -1,0 +1,63 @@
+---
+  - name: Install docker and requirements
+    block:
+       - name: Install Docker repository
+         ansible.builtin.yum_repository:
+            name: 'docker-repo'
+            description: 'Repository for Docker CE'
+            baseurl: 'https://download.docker.com/linux/centos/8/x86_64/stable'
+            state: 'present'
+            gpgkey: 'https://download.docker.com/linux/centos/gpg'
+#       - name: Install EPEL repository
+#         ansible.builtin.yum_repository:
+#            name: 'epel'
+#            description: 'Extra Packages for Enterprise Linux $releasever - $basearch'
+#            mirrorlist: 'https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir'
+#            state: 'present'
+#            gpgkey: 'https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8'
+       - name: Install docker-ce
+         ansible.builtin.yum:
+            name: 'docker-ce'
+            state: 'present'
+            enablerepo: 'docker-repo'
+       - name: Install Python requests module
+         ansible.builtin.yum:
+            name: 'python3-requests'
+            state: 'present'
+       - name: Install Python pip
+         ansible.builtin.yum:
+            name: 'python3-pip'
+            state: 'present'
+       - name: Install docker python module
+         ansible.builtin.pip:
+            name: 'docker'
+            state: 'present'
+  
+       - name: 'Start Docker'
+         ansible.builtin.service:
+            name: 'docker'
+            state: 'started'
+            enabled: 'yes'
+            
+       - name: Firewall - Allow inter-container communication
+         ansible.posix.firewalld:
+            masquerade: yes
+            zone: 'public'
+            permanent: yes
+            state: 'enabled'
+         notify: 'Restart firewalld'
+       - name: Firewall - Allow incoming http connections
+         ansible.posix.firewalld: 
+            service: 'http'
+            zone: 'public'
+            permanent: yes
+            state: 'enabled'
+         notify: 'Restart firewalld'
+         
+       - name: Create docker network
+         community.general.docker_network:
+            name: "{{ sol_dockernet }}"
+            state: present
+    become: yes
+
+

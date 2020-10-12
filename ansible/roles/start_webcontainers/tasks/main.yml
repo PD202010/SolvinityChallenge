@@ -1,0 +1,17 @@
+---
+   - name: 'Run containers'
+     community.general.docker_container:
+         name: "{{ item.containername }}"
+         image: "{{ item.containername }}:latest"
+         auto_remove: yes
+         networks: 
+           - name: 'bridge'
+           - name: "{{ sol_dockernet }}"
+             aliases: "{{ item.containername }}"
+         purge_networks: yes
+         published_ports: "{{ item.serverport }}:{{ item.serverport }}"
+         detach: yes
+         container_default_behavior: 'no_defaults'
+         state: started
+     with_items: "{{ sol_webcontainers }}"
+     become: yes

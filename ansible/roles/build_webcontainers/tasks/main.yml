@@ -1,0 +1,45 @@
+---
+   - name: 'Create directory for Docker builds'
+     ansible.builtin.file:
+        path: "{{ sol_dockercontainer_builddir }}/"
+        state: 'directory'
+        owner: "{{ ansible_user_id }}"
+        mode: '0755'
+     become: yes
+
+   - name: 'Create directory for Docker builds - webservers'
+     ansible.builtin.file:
+        path: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}"
+        state: 'directory'
+        owner: "{{ ansible_user_id }}"
+        mode: '0755'
+     with_items: "{{ sol_webcontainers }}"
+   - name: 'Create Dockerfile webservers'
+     ansible.builtin.template:
+        src: 'Dockerfile.webserver.j2'
+        dest: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}/Dockerfile"
+        owner: "{{ ansible_user_id }}"
+        mode: '0444'
+     with_items: "{{ sol_webcontainers }}"
+   - name: 'Create httpd.conf webservers'
+     ansible.builtin.template:
+        src: 'httpd.conf.webserver.j2'
+        dest: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}/httpd.conf"
+        owner: "{{ ansible_user_id }}"
+        mode: '0444'
+     with_items: "{{ sol_webcontainers }}"
+   - name: 'Create index.html webservers'
+     ansible.builtin.template:
+        src: 'index.html.webserver.j2'
+        dest: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}/index.html"
+        owner: "{{ ansible_user_id }}"
+        mode: '0444'
+     with_items: "{{ sol_webcontainers }}"
+
+   - name: 'Build webserver containers'
+     community.general.docker_image:
+         name: "{{ item.containername }}"
+         build:
+             path: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}"
+     with_items: "{{ sol_webcontainers }}"
+     become: yes

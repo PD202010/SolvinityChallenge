@@ -1,0 +1,8 @@
+---
+   - hosts: 'containerhosts'
+     roles:
+        - install_docker
+        - build_webcontainers
+        - build_lbcontainers
+        - start_webcontainers
+        - start_lbcontainers

@@ -1,0 +1,59 @@
+ServerRoot "/usr/local/apache2"
+ServerAdmin you@example.com
+ServerName {{ item.containername }}:{{ item.serverport }}
+Listen {{ item.serverport }}
+ErrorLog /proc/self/fd/2
+LogLevel warn
+
+LoadModule proxy_module      modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule headers_module    modules/mod_headers.so
+LoadModule lbmethod_byrequests_module modules/mod_lbmethod_byrequests.so
+LoadModule proxy_balancer_module modules/mod_proxy_balancer.so
+LoadModule slotmem_shm_module modules/mod_slotmem_shm.so
+LoadModule mpm_event_module modules/mod_mpm_event.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule reqtimeout_module modules/mod_reqtimeout.so
+LoadModule unixd_module modules/mod_unixd.so
+
+<Proxy "balancer://webservers">
+{% for webitem in sol_webcontainers %}
+   BalancerMember "http://{{ webitem.containername }}:{{ webitem.serverport }}"
+{% endfor %}
+</Proxy>
+
+ProxyRequests off
+ProxyPass / "balancer://webservers"
+ProxyPassReverse / "balancer://webservers"
+
+<Location />
+        ProxyPassReverse /
+        RequestHeader    unset  Accept-Encoding
+</Location>
+<Directory />
+    AllowOverride none
+    Require all denied
+</Directory>
+
+<IfModule !mpm_prefork_module>
+</IfModule>
+<IfModule mpm_prefork_module>
+</IfModule>
+<IfModule unixd_module>
+    User daemon
+    Group daemon
+</IfModule>
+<IfModule log_config_module>
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+    <IfModule logio_module>
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+    </IfModule>
+    CustomLog /proc/self/fd/1 common
+</IfModule>
+<IfModule cgid_module>
+</IfModule>
+<IfModule headers_module>
+    RequestHeader unset Proxy early
+</IfModule>
+

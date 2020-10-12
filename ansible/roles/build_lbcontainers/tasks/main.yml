@@ -1,0 +1,62 @@
+---
+   - name: 'Create directory for Docker builds'
+     ansible.builtin.file:
+        path: "{{ sol_dockercontainer_builddir }}/"
+        state: 'directory'
+        owner: "{{ ansible_user_id }}"
+        mode: '0755'
+     become: yes
+
+   - name: 'Create directory for Docker builds - loadbalancers'
+     ansible.builtin.file:
+        path: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}"
+        state: 'directory'
+        owner: "{{ ansible_user_id }}"
+        mode: '0755'
+     with_items: "{{ sol_lbcontainers }}"
+   - name: 'Create Dockerfile loadbalancers'
+     ansible.builtin.template:
+        src: 'Dockerfile.loadbalancer.j2'
+        dest: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}/Dockerfile"
+        owner: "{{ ansible_user_id }}"
+        mode: '0440'
+     with_items: "{{ sol_lbcontainers }}"
+     register: lb_dockerfile_results
+   - name: 'Create httpd.conf loadbalancers'
+     ansible.builtin.template:
+        src: 'httpd.conf.loadbalancer.j2'
+        dest: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}/httpd.conf"
+        owner: "{{ ansible_user_id }}"
+        mode: '0440'
+     with_items: "{{ sol_lbcontainers }}"
+     register: lb_httpd_results
+
+   - name: Combine results
+     set_fact: 
+         lb_rebuild_needed: "{{ ( lb_httpd_results.changed or lb_dockerfile_results.changed ) }}"
+     
+   - name: Ansible Debug result
+     debug:
+         var: lb_rebuild_needed
+
+   - name: 'Remove loadbalancer containers - workaround'
+     community.general.docker_image:
+         name: "{{ item.containername }}"
+         state: 'absent'
+         force_absent: 'yes'
+     with_items: "{{ sol_lbcontainers }}"
+     when: ( lb_httpd_results.changed or lb_dockerfile_results.changed ) 
+     become: yes 
+
+   - name: 'Build loadbalancer containers'
+     community.general.docker_image:
+         name: "{{ item.containername }}"
+         build: 
+             path: "{{ sol_dockercontainer_builddir }}/{{ item.containername }}"
+             pull: 'yes'
+         source: 'build'
+#         force_source: "{{ ( lb_httpd_results.changed or lb_dockerfile_results.changed ) }}"
+#         force_source: "{{ lb_rebuild_needed }}"
+#         force: yes
+     with_items: "{{ sol_lbcontainers }}"
+     become: yes 

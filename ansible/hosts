@@ -1,0 +1,20 @@
+---
+containerhosts:
+   hosts:
+      challenge:
+         ansible_host: 192.168.56.105
+         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'	
+   vars: 
+      sol_webcontainers: [
+        { containername: webserver1, serverport: 81, greeting: 'Hello Solvinity' },
+        { containername: webserver2, serverport: 82, greeting: 'Hello World!' },
+      ]
+      sol_lbcontainers: [
+        { containername: lbserver1, serverport: 80 }
+      ]
+          
+all:
+   vars: 
+      sol_dockercontainer_builddir: '/opt/solvinity-docker-builds'
+      sol_dockernet: 'frontend'
+

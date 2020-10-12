@@ -1,0 +1,4 @@
+---
+   - hosts: 'containerhosts'
+     roles: 
+        - install_docker

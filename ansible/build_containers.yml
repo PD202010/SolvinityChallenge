@@ -1,0 +1,5 @@
+---
+   - hosts: 'containerhosts'
+     roles: 
+        - build_webcontainers
+        - build_lbcontainers
