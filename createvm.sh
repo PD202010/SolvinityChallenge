@@ -19,7 +19,7 @@ export sol_isoimage=~/Downloads/CentOS-8.2.2004-x86_64-minimal.iso
 
 echo '*** Create VM ***'
 VBoxManage createvm --name "$sol_vmname" --ostype RedHat_64 --basefolder "$sol_basepath" --register
-VBoxManage modifyvm        "$sol_vmname" --description "$sol_desc" --memory $sol_vm_memory --vram 20 --cpus $vm_vcpus --cpuhotplug off --boot1 disk --boot2 dvd --boot3 none --boot4 none --graphicscontroller vmsvga
+VBoxManage modifyvm        "$sol_vmname" --description "$sol_desc" --memory $sol_vm_memory --vram 20 --cpus $sol_vm_vcpus --cpuhotplug off --boot1 disk --boot2 dvd --boot3 none --boot4 none --graphicscontroller vmsvga
 VBoxManage modifyvm        "$sol_vmname" --nic1 $sol_networktype  --nictype1 82540EM --cableconnected1 on --bridgeadapter1 $sol_network 
 VBoxManage storagectl      "$sol_vmname" --name SATA --add sata --controller IntelAhci --bootable on --portcount 2 
 VBoxManage storagectl      "$sol_vmname" --name USB  --add usb  --controller USB       --bootable on --portcount 8 
